@@ -1,0 +1,214 @@
+-- ******************** 1ª Avaliação – 4º Bimestre ***************************
+/*
+Israel Baruque
+Michel Botan
+*/
+-- ******************* Instruções para a avaliação. **************************
+-- •	Antes de entregar renomeie o arquivo da prova, colocando seu nome;
+--      	Ex: Eliton_camargo.sql
+-- •	Ao terminar a avaliação chame o professor para recolher o arquivo;
+
+-- Critérios 
+-- < 5 = I
+-- < 7 = R
+-- < 9 = B
+-- >=9 = MB
+
+-- ************* Diagrama da base de dados segue em anexo; ********************
+
+
+-- ************************** Script da base de dados **************************
+
+
+create database lojaWeb;
+
+use lojaWeb;
+
+create table usuario (
+	cpf varchar(14) primary key,
+	email varchar(50) not null unique,
+	senha varchar(10) not null,
+	nome varchar(20) not null,
+	sobrenome varchar(50) not null,
+	sexo char(1) null,
+	data_nasc date not null,
+	cep int not null,
+	uf char(2) not null,          
+	cidade varchar(100) not null,
+	bairro varchar(100) not null,
+	rua varchar(100) not null,
+	numero varchar(10) not null         
+)ENGINE=InnoDB;
+
+create table produto (
+	codigo int auto_increment primary key,
+	descricao varchar(150) not null,
+	quant_estoque int null,
+	valor double           
+)ENGINE=InnoDB;
+
+create table produto_item (
+	id_Prod varchar(20) not null,
+	fk_produto int not null,
+	data_fabric date not null,
+	data_validade date null,
+	foreign key (fk_produto) references produto(codigo) on delete cascade on update cascade,
+	primary key (id_Prod,fk_produto)
+)ENGINE=InnoDB;
+
+create table pedido (
+	codigo int auto_increment primary key,
+	FK_Usuario varchar(14) not null,
+	valorPedido  money not null,
+	dataPedido date not null,
+	statusPedido int not null,
+	foreign key(FK_Usuario) references usuario(cpf) on delete cascade on update cascade
+)ENGINE=InnoDB;
+
+create table produtos_em_pedido (
+	Fk_produto int not null,
+	Fk_pedido  int not null,
+	quantidade int default 1 not null,
+	primary key (Fk_produto,Fk_pedido),
+	foreign key (Fk_produto) references produto(codigo) on delete cascade on update cascade,
+	foreign key (Fk_pedido ) references pedido (codigo)  on delete cascade on update cascade
+)ENGINE=InnoDB;
+
+-- ******************** Exercícios ************************************
+-- 1º.	Crie um procedimento para cadastros de usuário.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usuarioCadastro`(IN `_cpf` VARCHAR(14), IN `_email` VARCHAR(50), IN `_senha` VARCHAR(10), IN `_nome` VARCHAR(20), IN `_sobrenome` VARCHAR(50), IN `_sexo` CHAR(1), IN `_data` DATE, IN `_cep` INT, IN `_uf` CHAR(2), IN `_cidade` VARCHAR(20), IN `_bairro` VARCHAR(50), IN `_rua` VARCHAR(50), IN `_numero` VARCHAR(5))
+INSERT INTO usuario(cpf, email, senha, nome, sobrenome, sexo, data_nasc, cep, uf, cidade, bairro, rua, numero)
+VALUES 
+(_cpf, _email, _senha, _nome, _sobrenome, _sexo, _data, _cep, _uf, _cidade, _bairro, _rua, _numero)
+ON DUPLICATE KEY UPDATE
+	usuario.cpf = _cpf,
+    usuario.email = _email$$
+DELIMITER ;
+*/
+
+-- 2º.	Crie um procedimento para alteração de dados de usuário.
+/*DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usuarioAlterar`(IN `_cpf` VARCHAR(14), IN `_email` VARCHAR(50), IN `_senha` VARCHAR(10), IN `_nome` VARCHAR(20), IN `_sobrenome` VARCHAR(50), IN `_sexo` CHAR(1), IN `_data` DATE, IN `_cep` INT, IN `_uf` CHAR(2), IN `_cidade` VARCHAR(20), IN `_bairro` VARCHAR(50), IN `_rua` VARCHAR(50), IN `_numero` VARCHAR(5))
+UPDATE usuario SET 
+usuario.email = _email, 
+usuario.senha = _senha, 
+usuario.nome = _nome, 
+usuario.sobrenome = _sobrenome, 
+usuario.sexo = _sexo, 
+usuario.data_nasc = _data, 
+usuario.cep = _cep, 
+usuario.uf = _uf,
+usuario.cidade = _cidade, 
+usuario.bairro = _bairro,
+usuario.rua = _rua, 
+usuario.numero = _numero
+WHERE usuario.cpf = _cpf$$
+DELIMITER ;*/
+
+-- 3º.	Crie um procedimento para exclusão de usuário.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usuarioDeletar`(IN `_cpf` VARCHAR(14))
+DELETE FROM usuario WHERE usuario.cpf = _cpf$$
+DELIMITER ;
+*/
+
+-- 4º.	Crie um procedimento de consulta de usuário por CPF.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usuarioColsuntarCPF`(IN `_cpf` VARCHAR(14))
+SELECT * FROM usuario WHERE usuario.cpf = _cpf$$
+DELIMITER ;
+*/
+
+-- 5º.	Crie um procedimento de consulta de usuários por nome.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usuarioColsuntarNome`(IN `_nome` VARCHAR(20))
+SELECT * FROM usuario WHERE usuario.nome = _nome$$
+DELIMITER ;
+*/
+
+-- 6º.	Crie um procedimento para cadastro produto.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `produtoCadastro`(IN `_codigo` INT, IN `_descricao` VARCHAR(150), IN `_quant` INT, IN `_valor` DOUBLE)
+INSERT INTO produto(codigo, descricao, quant_estoque, valor)
+VALUES (_codigo, _descricao, _quant, _valor)
+ON DUPLICATE KEY UPDATE
+	produto.codigo = _codigo$$
+DELIMITER ;
+*/
+
+-- 7º.	Crie um procedimento para excluir produto.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `produtoDeletar`(IN `_codigo` INT)
+DELETE FROM produto WHERE produto.codigo = _codigo$$
+DELIMITER ;
+*/
+
+-- 8º.	Crie um procedimento para consultar produtos. 
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `produtoConsultar`()
+SELECT * FROM produto$$
+DELIMITER ;
+*/
+
+-- 9º.	Crie um procedimento para cadastrar produto_item.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `produto_itemCadastro`(IN `_id_Prod` INT, IN `_fk_produto` INT, IN `_dataF` DATE, IN `_dataV` DATE)
+INSERT INTO produto_item(produto_item.id_Prod, produto_item.fk_produto, produto_item.data_fabric, produto_item.data_validade)
+VALUES (_id_Prod, _fk_produto, _dataF, _dataV)
+ON DUPLICATE KEY UPDATE
+	produto_item.id_Prod = _id_Prod$$
+DELIMITER ;
+*/
+
+-- 10º.	Crie um procedimento para excluir produto_item.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `produto_itemDeletar`(IN `_id_Prod` INT)
+DELETE FROM produto_item WHERE produto_item.id_Prod = _id_Prod$$
+DELIMITER ;
+*/
+
+-- 11º.	Crie um procedimento para cadastrar pedido
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `pedidoCadastro`(IN `_codigo` INT(11), IN `_FK_Usuario` VARCHAR(14), IN `_valorPedido` DOUBLE, IN `_dataPedido` DATE, IN `_statusPedido` INT(11))
+INSERT INTO pedido(pedido.codigo, pedido.FK_Usuario, pedido.valorPedido, pedido.dataPedido, pedido.statusPedido)
+VALUES (_codigo, _FK_Usuario, _valorPedido, _dataPedido, _statusPedido)
+ON DUPLICATE KEY UPDATE
+	pedido.codigo = _codigo$$
+DELIMITER ;
+*/
+
+-- 12º.	Crie um procedimento para excluir pedido.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `pedidoDeletar`(IN `_codigo` INT)
+DELETE FROM pedido WHERE pedido.codigo = _codigo$$
+DELIMITER ;
+*/
+
+-- 13º.	Crie um procedimento para consultar todos os pedidos.
+/*
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `pedidoConsultar`()
+SELECT * FROM pedido$$
+DELIMITER ;
+*/
+
+-- 14º.	Crie um procedimento para excluir todos os pedidos de um usuário.
+/*
+
+*/
+
+-- 15º.	Crie um procedimento para adicionar produto em pedido, levando em 
+-- consideração que se o produto não existir no estoque não poderá ser adicionado ao pedido.
+-- 16º.	Crie um procedimento para excluir um produto de um pedido.
